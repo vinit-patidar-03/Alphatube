@@ -5,6 +5,7 @@ import { fetchData } from "../API/YoutubeAPI";
 import { useNavigate, useParams } from "react-router-dom";
 import Context from "../context/Context";
 import { formatViewCount } from "../utils/videoHelpers";
+import { FaEye, FaThumbsUp } from "react-icons/fa";
 
 const VideoPlayer = () => {
   const { channel, setChannel, theme } = useContext(Context);
@@ -73,28 +74,22 @@ const VideoPlayer = () => {
                   alt="verify"
                 />
               </h4>
-              <div className="flex">
-                {channel.meta.subscriberCountText ? (
+              <div className="flex gap-5">
+                {channel.meta.subscriberCountText && (
                   <h1 className="ml-2 text-sm">
                     {channel.meta.subscriberCountText} subscribers
                   </h1>
-                ) : (
-                  " "
                 )}
-                <h4 className="text-sm ml-2">
+                <div className="text-sm ml-2 flex items-center gap-2">
+                  <FaEye className="text-lg" />
                   {formatViewCount(videodetail.viewCount)} views
-                </h4>
+                </div>
+                <div className="text-sm ml-2 flex items-center gap-2">
+                  <FaThumbsUp className="text-lg" />
+                  {formatViewCount(videodetail.likeCount)} likes
+                </div>
               </div>
-              <h4 className="text-sm ml-2">
-                {formatViewCount(videodetail.likeCount)} likes
-              </h4>
             </div>
-            <button
-              className={`bg-${theme === "light" ? "black" : "white"}  ${theme === "light" ? "text-white" : "text-black"
-                } py-1 font-bold ml-5 px-4 rounded-full cursor-pointer`}
-            >
-              Subscribe
-            </button>
           </div>
         </div>
       ) : (
