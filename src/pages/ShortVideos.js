@@ -6,37 +6,37 @@ import { useLocation, useParams } from "react-router-dom";
 import { fetchData } from "../API/YoutubeAPI";
 import { FaArrowCircleLeft, FaArrowCircleRight } from "react-icons/fa";
 import Spinner from "../components/Spinner";
+import Loader from "../components/Loader";
 
 const ShortVideos = () => {
   const { id, cid } = useParams();
   const location = useLocation();
   const { shortscategory } = useContext(Context);
-  const [shorts, setShorts] = useState("");
+  const [shorts, setShorts] = useState([]);
   const [shortNo, setShortNo] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [playerReady, setPlayerReady] = useState(false);
 
   useEffect(() => {
     fetchshortsData();
     setShortNo(0);
+    setPlayerReady(false);
   }, [location]);
 
-  const fetchshortsData = () => {
+  const fetchshortsData = async () => {
+    setLoading(true);
     if (cid !== shortscategory && id === ":id") {
-      fetchData(`search?query=${shortscategory}`).then((res) => {
-        setShorts(
-          res.data.data.filter((elem) => {
-            return elem.type === "shorts_listing";
-          })[0].data
-        );
-      });
+      const res = await fetchData(`search?query=${shortscategory}`);
+      setShorts(
+        res.data.data.filter((elem) => {
+          return elem.type === "shorts_listing";
+        })[0].data
+      );
     } else if (shortscategory === cid && id === ":id") {
-      fetchData(`channel/shorts?id=${shortscategory}`).then((res) => {
-        setShorts(res.data.data);
-      });
+      const res = await fetchData(`channel/shorts?id=${shortscategory}`);
+      setShorts(res.data.data);
     }
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000)
+    setLoading(false);
   };
 
   const changeShortPage = (e) => {
@@ -54,21 +54,21 @@ const ShortVideos = () => {
   if (id !== ":id") {
     return (
       <>
-        {id !== ":id" && (
-          <div className="flex justify-center items-center h-[100vh] relative">
-            <div className="relative flex justify-center items-center p-3 rounded-xl h-[calc(100vh-160px)] w-[calc(0.5625*(100vh-140px))]">
-              <div className=" w-full h-full shortPlayer">
-                <ReactPlayer
-                  url={`https://www.youtube.com/watch?v=${id}}`}
-                  playing={true}
-                  loop={true}
-                  width="100%"
-                  height="100%"
-                />
-              </div>
-            </div>
+        <div className="flex justify-center items-center min-h-[100vh] px-3 py-5">
+          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black shadow-2xl h-[calc(100vh-160px)] w-[min(420px,calc(0.5625*(100vh-140px)))]">
+            {!playerReady && <Loader />}
+            <ReactPlayer
+              url={`https://www.youtube.com/watch?v=${id}`}
+              playing={true}
+              loop={true}
+              width="100%"
+              height="100%"
+              onReady={() => setPlayerReady(true)}
+              onError={() => setPlayerReady(true)}
+              playsinline
+            />
           </div>
-        )}
+        </div>
       </>
     )
   }
@@ -76,40 +76,46 @@ const ShortVideos = () => {
     return (
       <>
         {shorts.length !== 0 ? (
-          <div className="flex justify-center items-center h-[100vh] relative">
-            <div className="relative flex justify-center items-center p-3 rounded-xl h-[calc(100vh-160px)] w-[calc(0.5625*(100vh-140px))]">
-              <div className=" w-full h-full shortPlayer">
-                <ReactPlayer
-                  url={`https://www.youtube.com/watch?v=${shorts[shortNo].videoId}`}
-                  playing={true}
-                  loop={true}
-                  width="100%"
-                  height="100%"
-                />
-              </div>
-              <div className=" absolute mx-2 flex justify-between w-[95%]">
-                <div
-                  className="rounded-full mr-3 cursor-pointer text-white py-4 px-1 text-2xl"
+          <div className="flex justify-center items-center min-h-[100vh] px-3 py-5">
+            <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black h-[calc(100vh-160px)] w-[min(420px,calc(0.5625*(100vh-140px)))]">
+              {!playerReady && <Loader />}
+              <ReactPlayer
+                url={`https://www.youtube.com/watch?v=${shorts[shortNo].videoId}`}
+                playing={true}
+                loop={true}
+                width="100%"
+                height="100%"
+                onReady={() => setPlayerReady(true)}
+                onError={() => setPlayerReady(true)}
+                playsinline
+              />
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-3 pointer-events-none">
+                <button
+                  type="button"
+                  className="pointer-events-auto rounded-full bg-black/50 backdrop-blur-sm text-white p-3 text-2xl hover:bg-black/70 transition"
                   onClick={() => {
                     changeShortPage("decr");
                   }}
+                  aria-label="Previous short"
                 >
                   <FaArrowCircleLeft />
-                </div>
-                <div
-                  className="rounded-full ml-3 cursor-pointer text-white py-4 px-1 text-2xl"
+                </button>
+                <button
+                  type="button"
+                  className="pointer-events-auto rounded-full bg-black/50 backdrop-blur-sm text-white p-3 text-2xl hover:bg-black/70 transition"
                   onClick={() => {
                     changeShortPage("incr");
                   }}
+                  aria-label="Next short"
                 >
                   <FaArrowCircleRight />
-                </div>
+                </button>
               </div>
-              <div className="absolute bottom-5 shortDetails ml-3 w-[95%]">
-                <p className="text-white font-bold text-sm">
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-4">
+                <p className="text-white font-bold text-sm line-clamp-2">
                   {shorts[shortNo].title}
                 </p>
-                <p className="text-white text-xs">
+                <p className="text-white/80 text-xs mt-1">
                   {shorts[shortNo].viewCountText}
                 </p>
               </div>

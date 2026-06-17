@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import Video from "../components/Video";
+import VideoPlayer from "../components/VideoPlayer";
 import SuggestVideo from "../components/SuggestedVideos";
 import { useParams } from "react-router-dom";
 import Context from "../context/Context";
@@ -23,7 +23,7 @@ const VideoDetails = () => {
   };
   return (
     <div className="flex relative lg:h-[100vh] flex-col sm:items-center md:items-start lg:flex-row mb-[50px] lg:mb-0">
-      <Video />
+      <VideoPlayer />
       <SuggestVideo setLoading={setLoading} />
       <div
         className={`fixed right-[10px] bottom-[50px] cursor-pointer flex justify-center items-center rounded-full w-10 h-10 bg-${theme === "light" ? "white" : "black"

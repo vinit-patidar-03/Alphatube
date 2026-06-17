@@ -1,10 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Context from "../context/Context";
+import VideoDurationBadge from "./VideoDurationBadge";
+import Loader from "./Loader";
+
 const PlaylistVideoCard = (props) => {
   const { video } = props;
   const Navigate = useNavigate();
   const { theme } = useContext(Context);
+  const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
   const Render = () => {
     Navigate(`/video/${video.videoId}/${video.channelId}`);
   };
@@ -15,23 +19,17 @@ const PlaylistVideoCard = (props) => {
           }  text-sm sm:text-xs`}
       >
         <div className="w-full relative">
+          {!thumbnailLoaded && <Loader />}
           <img
             src={video?.thumbnail[2]?.url || video?.thumbnail[0]?.url}
             onClick={Render}
-            className="w-full sm:rounded-xl object-cover cursor-pointer"
+            className="w-full h-52 sm:rounded-xl object-cover cursor-pointer"
+            onLoad={() => setThumbnailLoaded(true)}
+            onError={() => setThumbnailLoaded(true)}
             alt="logo"
           />
           <div className="text-white text-center absolute right-2 bottom-2">
-            <h5
-              className={`${video.lengthText === "LIVE" ? "bg-red-600" : "bg-black"
-                } px-1  rounded-[7px]`}
-            >
-              {video.isLive ? (
-                <p> • {video.lengthText}</p>
-              ) : (
-                <p>{video.lengthText}</p>
-              )}
-            </h5>
+            <VideoDurationBadge video={video} />
           </div>
         </div>
         <div className="flex m-1">

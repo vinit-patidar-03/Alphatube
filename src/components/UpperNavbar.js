@@ -1,32 +1,32 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import Context from "../context/Context";
-import { useLocation, useNavigate } from "react-router-dom";
-import { IoIosAddCircle, IoMdSearch } from "react-icons/io";
-import { FaRegUserCircle } from "react-icons/fa";
-import { FaBell, FaMicrophone } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+import { IoMdSearch } from "react-icons/io";
+import { FaMoon, FaSun } from "react-icons/fa6";
 
 const UpperNavbar = () => {
-  const { setSearchcategory, theme } = useContext(Context);
+  const { setSearchcategory, theme, setTheme } = useContext(Context);
   const [search, setSearch] = useState("");
   const Navigate = useNavigate();
-  const location = useLocation();
-  useEffect(() => { }, [location]);
 
   const setCategory = (event) => {
     setSearch(event.target.value);
   };
 
-  const searchResults = (event) => {
+  const performSearch = () => {
     if (search.length !== 0) {
       setSearchcategory(search);
       Navigate(`/searchResults/${search}`);
     }
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
   const searchEnter = (event) => {
-    if (event.key === "Enter" && search.length !== 0) {
-      setSearchcategory(search);
-      Navigate(`/searchResults/${search}`);
+    if (event.key === "Enter") {
+      performSearch();
     }
   };
 
@@ -68,25 +68,23 @@ const UpperNavbar = () => {
               <div
                 id="serchButton"
                 className="flex justify-center items-center w-[40px] h-[35px] bg-slate-400 rounded-r-full cursor-pointer"
-                onClick={searchResults}
+                onClick={performSearch}
               >
                 <IoMdSearch className="text-2xl" />
               </div>
-              <FaMicrophone className="mx-3 sm:block hidden text-2xl" />
             </div>
           </li>
 
           <li className="flex items-center justify-center mx-3">
-            <div className="flex justify-center items-center">
-              <IoIosAddCircle className="mx-2 cursor-pointer sm:block hidden text-xl" />
-              <FaBell className="mx-2 cursor-pointer sm:block hidden text-xl" />
-              <div
-                className="w-8 h-8 rounded-full flex justify-center items-center mx-3 cursor-pointer"
-                title="Account"
-              >
-                <FaRegUserCircle className="text-3xl" />
-              </div>
-            </div>
+            <button
+              type="button"
+              className={`w-9 h-9 rounded-full flex justify-center items-center ${theme === "light" ? "bg-slate-200" : "bg-slate-800"}`}
+              onClick={toggleTheme}
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? <FaMoon className="text-lg" /> : <FaSun className="text-lg" />}
+            </button>
           </li>
         </ul>
       </nav>

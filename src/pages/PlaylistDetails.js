@@ -5,10 +5,12 @@ import { fetchData } from "../API/YoutubeAPI";
 import PlaylistVideoCard from "../components/PlaylistVideoCard";
 import Context from "../context/Context";
 import Spinner from "../components/Spinner";
+import Loader from "../components/Loader";
 
 const PlaylistDetails = (props) => {
   const { pid } = useParams();
   const { theme } = useContext(Context);
+  const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
   const [channelPlaylistsVideos, setChannelPlaylistsVideos] = useState();
   useEffect(() => {
     fetchPlaylistVideos();
@@ -34,11 +36,14 @@ const PlaylistDetails = (props) => {
                 }}
               >
                 <div className=" w-full lg:w-[calc(25%-0.375rem)] md:w-[calc(33.33%-0.333rem)] sm:w-[calc(50%-0.25rem)] relative">
+                  {!thumbnailLoaded && <Loader />}
                   <img
                     src={
                       channelPlaylistsVideos?.meta?.thumbnail[3]?.url ||
                       channelPlaylistsVideos?.meta?.thumbnail[0]?.url
                     }
+                    onLoad={() => setThumbnailLoaded(true)}
+                    onError={() => setThumbnailLoaded(true)}
                     className=" w-full"
                     alt="thumbnail"
                   />

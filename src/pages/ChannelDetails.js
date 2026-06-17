@@ -11,6 +11,8 @@ import PlaylistCard from "../components/PlaylistCard";
 import Channels from "../components/Channels";
 import ShortsCard from "../components/ShortsCard";
 import Spinner from "../components/Spinner";
+import { getItemsByType } from "../utils/videoHelpers";
+import Loader from "../components/Loader";
 
 const ChannelDetails = () => {
   const { cid } = useParams();
@@ -19,12 +21,25 @@ const ChannelDetails = () => {
   const [videopage, setVideoPage] = useState(0);
   const [playlistpage, setPlaylistPage] = useState(0);
   const [channelVideos, setChannelVideos] = useState("");
+  const [bannerLoaded, setBannerLoaded] = useState(false);
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
   const { channel, setChannel, theme, setShortsCategory, setCid } =
     useContext(Context);
+  const channelData = channel?.data || [];
+  const liveListings = getItemsByType(channelData, "video_listing").filter(
+    (elem) => elem.title.split(" ")[1] === "live"
+  );
+  const liveVideos = liveListings[0]?.data || [];
+  const shortsListings = getItemsByType(channelData, "shorts_listing");
+  const shortVideos = shortsListings[0]?.data || [];
+  const channelListings = getItemsByType(channelData, "channel_listing");
+  const relatedChannels = channelListings[0]?.data || [];
 
   useEffect(() => {
     fetchChannel(cid);
     moveTotop();
+    setBannerLoaded(false);
+    setAvatarLoaded(false);
     setCid(cid);
     setShortsCategory(cid);
     fetchMoreChannelVideos(cid);
@@ -91,19 +106,27 @@ const ChannelDetails = () => {
         >
           <div className="mt-[60px]">
             {channel.meta.banner && (
-              <img
-                src={channel.meta.banner[1].url}
-                className="w-full"
-                alt="banner"
-              />
+              <div className="relative w-full min-h-[120px]">
+                {!bannerLoaded && <Loader />}
+                <img
+                  src={channel.meta.banner[1].url}
+                  className="w-full"
+                  onLoad={() => setBannerLoaded(true)}
+                  onError={() => setBannerLoaded(true)}
+                  alt="banner"
+                />
+              </div>
             )}
           </div>
 
           <div className="flex my-2 ml-5 ">
-            <div className="flex items-start">
+            <div className="flex items-start relative w-[50px] h-[50px]">
+              {!avatarLoaded && <Loader className="rounded-full" />}
               <img
                 src={channel.meta.avatar[0].url}
-                className="rounded-full w-[50px]"
+                className="rounded-full w-[50px] h-[50px] object-cover"
+                onLoad={() => setAvatarLoaded(true)}
+                onError={() => setAvatarLoaded(true)}
                 alt="avatar"
               />
             </div>
@@ -189,34 +212,15 @@ const ChannelDetails = () => {
               className={`${active === "#Live" ? "block" : "hidden"} mb-[50px]`}
             >
               <div className="flex flex-wrap my-5 gap-2 sm:p-2">
-                {channel.data.filter((elem) => {
-                  return (
-                    elem.type === "video_listing" &&
-                    elem.title.split(" ")[1] === "live"
-                  );
-                }).length !== 0 &&
-                  channel.data
-                    .filter((elem) => {
-                      return (
-                        elem.type === "video_listing" &&
-                        elem.title.split(" ")[1] === "live"
-                      );
-                    })[0]
-                    .data.map((elem, index) => {
-                      return (
-                        <ChannelVideos video={elem} key={index} cid={cid} />
-                      );
-                    })}
-                {channel.data.filter((elem) => {
-                  return (
-                    elem.type === "video_listing" &&
-                    elem.title.split(" ")[1] === "live"
-                  );
-                }).length === 0 && (
-                    <h1 className="text-center text-xl w-[100vw] font-semibold">
-                      No Live Videos
-                    </h1>
-                  )}
+                {liveVideos.length !== 0 &&
+                  liveVideos.map((elem, index) => {
+                    return <ChannelVideos video={elem} key={index} cid={cid} />;
+                  })}
+                {liveVideos.length === 0 && (
+                  <h1 className="text-center text-xl w-[100vw] font-semibold">
+                    No Live Videos
+                  </h1>
+                )}
               </div>
             </section>
 
@@ -244,7 +248,7 @@ const ChannelDetails = () => {
                 }`}
             >
               {playlist.length === 0 && (
-                <h1 className="text-center text-xl w-[100vw] font-semibold">
+                <h1 className="text-center text-xl my-5 w-[100vw] font-semibold">
                   No Plylists
                 </h1>
               )}
@@ -266,7 +270,7 @@ const ChannelDetails = () => {
                       onClick={() => {
                         ChangePage("decr", "playlist");
                       }}
-                      className={`py-2 px-5 text-${theme === " light" ? "black" : "white"
+                      className={`py-2 px-5 text-${theme === "light" ? "black" : "white"
                         } rounded-full font-semibold`}
                     >
                       <GrFormPrevious />
@@ -275,7 +279,7 @@ const ChannelDetails = () => {
                       onClick={() => {
                         ChangePage("incr", "playlist");
                       }}
-                      className={`py-2 px-5 text-${theme === " light" ? "black" : "white"
+                      className={`py-2 px-5 text-${theme === "light" ? "black" : "white"
                         } rounded-full font-semibold`}
                     >
                       <GrFormNext />
@@ -300,23 +304,15 @@ const ChannelDetails = () => {
                 }`}
             >
               <div className="flex flex-wrap justify-center my-5 mb-[50px]">
-                {channel.data.filter((elem) => {
-                  return elem.type === "shorts_listing";
-                }).length !== 0 &&
-                  channel.data
-                    .filter((elem) => {
-                      return elem.type === "shorts_listing";
-                    })[0]
-                    .data.map((elem, index) => {
-                      return <ShortsCard video={elem} key={index} cid={cid} />;
-                    })}
-                {channel.data.filter((elem) => {
-                  return elem.type === "shorts_listing";
-                }).length === 0 && (
-                    <h1 className="text-center text-xl w-[100vw] font-semibold">
-                      No Shorts Posted
-                    </h1>
-                  )}
+                {shortVideos.length !== 0 &&
+                  shortVideos.map((elem, index) => {
+                    return <ShortsCard video={elem} key={index} cid={cid} />;
+                  })}
+                {shortVideos.length === 0 && (
+                  <h1 className="text-center text-xl w-[100vw] font-semibold">
+                    No Shorts Posted
+                  </h1>
+                )}
               </div>
             </section>
 
@@ -327,23 +323,15 @@ const ChannelDetails = () => {
             >
               <div>
                 <div className="flex justify-center flex-wrap my-5 mb-[50px]">
-                  {channel.data.filter((elem) => {
-                    return elem.type === "channel_listing";
-                  }).length !== 0 &&
-                    channel.data
-                      .filter((elem) => {
-                        return elem.type === "channel_listing";
-                      })[0]
-                      .data.map((elem, index) => {
-                        return <Channels video={elem} key={index} />;
-                      })}
-                  {channel.data.filter((elem) => {
-                    return elem.type === "channel_listing";
-                  }).length === 0 && (
-                      <h1 className="text-center text-xl w-[100vw] font-semibold">
-                        No Other Channel
-                      </h1>
-                    )}
+                  {relatedChannels.length !== 0 &&
+                    relatedChannels.map((elem, index) => {
+                      return <Channels video={elem} key={index} />;
+                    })}
+                  {relatedChannels.length === 0 && (
+                    <h1 className="text-center text-xl w-[100vw] font-semibold">
+                      No Other Channel
+                    </h1>
+                  )}
                 </div>
                 <div></div>
               </div>
