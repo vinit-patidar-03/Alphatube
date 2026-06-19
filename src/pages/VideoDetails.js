@@ -23,8 +23,8 @@ const VideoDetails = () => {
   };
   return (
     <div className="flex relative lg:h-[100vh] flex-col sm:items-center md:items-start lg:flex-row mb-[50px] lg:mb-0">
-      <VideoPlayer />
-      <SuggestVideo setLoading={setLoading} />
+      <VideoPlayer setLoading={setLoading} />
+      {!loading && <SuggestVideo />}
       <div
         className={`fixed right-[10px] bottom-[50px] cursor-pointer flex justify-center items-center rounded-full w-10 h-10 bg-${theme === "light" ? "white" : "black"
           } text-${theme === "light" ? "black" : "white"}`}

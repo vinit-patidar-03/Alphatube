@@ -7,7 +7,7 @@ import Context from "../context/Context";
 import { formatViewCount } from "../utils/videoHelpers";
 import { FaEye, FaThumbsUp } from "react-icons/fa";
 
-const VideoPlayer = () => {
+const VideoPlayer = ({ setLoading }) => {
   const { channel, setChannel, theme } = useContext(Context);
   const { id, cid } = useParams();
   const Navigate = useNavigate();
@@ -48,6 +48,7 @@ const VideoPlayer = () => {
               width="100%"
               height="100%"
               controls
+              onReady={() => setLoading(false)}
             />
           </div>
           <h1 className="md:text-lg text-sm font-semibold mt-2 ml-2">
@@ -74,19 +75,21 @@ const VideoPlayer = () => {
                   alt="verify"
                 />
               </h4>
-              <div className="flex gap-5">
+              <div className="flex gap-2 flex-col sm:gap-5 sm:flex-row">
                 {channel.meta.subscriberCountText && (
                   <h1 className="ml-2 text-sm">
                     {channel.meta.subscriberCountText} subscribers
                   </h1>
                 )}
-                <div className="text-sm ml-2 flex items-center gap-2">
-                  <FaEye className="text-lg" />
-                  {formatViewCount(videodetail.viewCount)} views
-                </div>
-                <div className="text-sm ml-2 flex items-center gap-2">
-                  <FaThumbsUp className="text-lg" />
-                  {formatViewCount(videodetail.likeCount)} likes
+                <div className="flex gap-2">
+                  <div className="text-sm ml-2 flex items-center gap-2 border-2 border-black p-1 rounded-full">
+                    <FaEye className="text-lg" />
+                    {formatViewCount(videodetail.viewCount)} views
+                  </div>
+                  <div className="text-sm ml-2 flex items-center gap-2 border-2 border-black p-1 rounded-full">
+                    <FaThumbsUp className="text-lg" />
+                    {formatViewCount(videodetail.likeCount)} likes
+                  </div>
                 </div>
               </div>
             </div>
