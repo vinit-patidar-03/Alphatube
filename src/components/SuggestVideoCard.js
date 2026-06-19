@@ -70,9 +70,9 @@ const SuggestVideoCard = (props) => {
             </div>
             <div className="lg:hidden">
               <div className="flex items-center mt-2">
-                {video.channelThumbnail.length !== 0 && (
+                {video?.channelThumbnail && video?.channelThumbnail?.length !== 0 && (
                   <img
-                    src={video?.channelThumbnail[0].url}
+                    src={video?.channelThumbnail[0]?.url}
                     width="30px"
                     className="rounded-full mr-2"
                     alt="channel"
@@ -84,7 +84,7 @@ const SuggestVideoCard = (props) => {
                   className="self-center mx-2 w-3"
                   alt="verify"
                 />
-                {video.isLive && (
+                {video?.isLive && (
                   <div className="flex items-center my-2">
                     <img
                       src="/images/live.webp"
